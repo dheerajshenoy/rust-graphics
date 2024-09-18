@@ -160,6 +160,11 @@ impl Body {
 
     }
 
+
+    fn overlaps(&self, other: &Body) -> bool {
+        (self.position - other.position).norm() <= (self.radius + other.radius)
+    }
+
 }
 
 #[macroquad::main("MyGame")]
@@ -171,28 +176,41 @@ async fn main() {
     let mut show_info_state = true;
     let mut trails_state = true;
     
-    let mut b1 = Body::new(Vec2d::new(400.0, 50.0),
-        Vec2d::new(10.0, 5.0),
-        0.5,
-        4.0,
-        WHITE);
+    // let mut b1 = Body::new(Vec2d::new(400.0, 50.0),
+    //     Vec2d::new(10.0, 5.0),
+    //     0.5,
+    //     4.0,
+    //     WHITE);
 
-    let mut b2 = Body::new(Vec2d::new(300.0, 400.0),
-        Vec2d::new(0.0, 0.0),
-        10000.0,
-        10.0,
-        WHITE);
+    // let mut b2 = Body::new(Vec2d::new(300.0, 400.0),
+    //     Vec2d::new(0.0, 0.0),
+    //     10000.0,
+    //     10.0,
+    //     WHITE);
 
-    let mut bodies = vec![b1, b2];
+    let mut bodies = vec![];
+    // let mut bodies = vec![b1, b2];
 
     loop {
 
         if is_key_pressed(KeyCode::Space) {
             bodies.clear();
-            b1 = Body::random();
-            b2 = Body::random();
+
+            let mut b1 = Body::random();
+            let mut b2 = Body::random();
+            let mut b3 = Body::random();
+            
+            while b1.overlaps(&b2) {
+                b2 = Body::random();
+            }
+
+            while b2.overlaps(&b3) || b1.overlaps(&b3) {
+                b3 = Body::random();
+            }
+
             bodies.push(b1);
             bodies.push(b2);
+            bodies.push(b3);
         }
 
         if is_key_pressed(KeyCode::C) {
@@ -217,38 +235,43 @@ async fn main() {
 
         clear_background(BLACK);
 
-            for i in 0..bodies.len() {
-                let b = &mut bodies[i];
-                b.draw();
+        for i in 0..bodies.len() {
+            let b = &mut bodies[i];
+            b.draw();
 
-                b.move_body(dt);
+            b.move_body(dt);
 
-                if trails_state {
-                    b.draw_trails();
-                }
+            // If trails enabled
+            if trails_state {
+                b.draw_trails();
+            }
                 
-
-                // If boundary collision enabled
-                if boundary_collision_state {
-                    b.check_boundary_collision();
-                }
-
-                // If body info enabled
-                if body_info_state {
-                    b.draw_info();
-                }
-
-                for j in i + 1..bodies.len() {
-                    let (left, right) = bodies.split_at_mut(j);
-
-                    if collision_state {
-                        left[i].handle_collision(&mut right[0]);
-                    }
-                    left[i].apply_gravity(&mut right[0]);
-                }
+            // If boundary collision enabled
+            if boundary_collision_state {
+                b.check_boundary_collision();
             }
 
+            // If body info enabled
+            if body_info_state {
+                b.draw_info();
+            }
+
+            for j in i + 1..bodies.len() {
+                let (left, right) = bodies.split_at_mut(j);
+
+                // If particle collision enabled
+                if collision_state {
+                    left[i].handle_collision(&mut right[0]);
+                }
+
+                left[i].apply_gravity(&mut right[0]);
+            }
+        }
+
         if show_info_state {
+            draw_text("Restart (R)",
+                10.0, screen_height() - 190.0, 24.0, WHITE);
+
             draw_text("Randomize (Space)",
                 10.0, screen_height() - 160.0, 24.0, WHITE);
 
