@@ -1,7 +1,8 @@
-use macroquad::{color::WHITE, shapes::draw_line};
+use macroquad::{color::{Color, WHITE}, shapes::draw_line};
 
 use crate::vec2d::{self, Vec2d};
 
+#[derive(Clone, Debug)]
 pub struct Trail {
     positions: Vec<Vec2d>,
     max_length: usize,
@@ -25,13 +26,16 @@ impl Trail {
 
     pub fn draw(&self) {
         for i in 1..self.positions.len() {
+            let t = (self.positions.len() - i)as f32 / self.positions.len() as f32;
+            let opacity = 1.0 - t;
+            let color = Color::new(1.0, 1.0, 1.0, opacity);
             draw_line(
                 self.positions[i - 1].x(),
                 self.positions[i - 1].y(),
                 self.positions[i].x(),
                 self.positions[i].y(),
                 2.0,
-                WHITE);
+                color);
         }
     }
 }
