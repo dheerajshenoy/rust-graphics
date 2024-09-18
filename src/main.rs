@@ -1,5 +1,4 @@
 use std::any::{type_name, Any};
-use std::time::{self, SystemTime, UNIX_EPOCH};
 use std::vec;
 use macroquad::color::Color;
 use macroquad::input::{is_key_down, is_key_pressed};
@@ -15,7 +14,7 @@ use vec2d::Vec2d;
 mod vec2d;
 mod trail;
 
-const G: f32 = 1.0;  // Gravitational constant (scaled for simulation)
+const G: f32 = 0.1;  // Gravitational constant (scaled for simulation)
 
 struct Body {
     position: Vec2d,
@@ -29,14 +28,12 @@ struct Body {
 impl Body {
 
     fn random() -> Self {
-        let time = SystemTime::now();
-        rand::srand(time.duration_since(UNIX_EPOCH).expect("Time went backwards").as_millis() as u64);
         let radius = rand::gen_range(1, 10) as f32;
         let x = rand::gen_range(0, macroquad::window::screen_width() as i32) as f32;
         let y = rand::gen_range(0, macroquad::window::screen_height() as i32) as f32;
         let position = Vec2d::new(x, y);
-        let velocity = Vec2d::new(rand::gen_range(0, 3) as f32, rand::gen_range(0, 3) as f32);
-        let mass = rand::gen_range(1, 10) as f32;
+        let velocity = Vec2d::new(rand::gen_range(0, 15) as f32, rand::gen_range(0, 15) as f32);
+        let mass = rand::gen_range(1, 10000) as f32;
         let color = macroquad::color::WHITE;
         let trail = Trail::new(100);
         Body {
@@ -176,18 +173,6 @@ async fn main() {
     let mut show_info_state = true;
     let mut trails_state = true;
     
-    // let mut b1 = Body::new(Vec2d::new(400.0, 50.0),
-    //     Vec2d::new(10.0, 5.0),
-    //     0.5,
-    //     4.0,
-    //     WHITE);
-
-    // let mut b2 = Body::new(Vec2d::new(300.0, 400.0),
-    //     Vec2d::new(0.0, 0.0),
-    //     10000.0,
-    //     10.0,
-    //     WHITE);
-
     let mut bodies = vec![];
     // let mut bodies = vec![b1, b2];
 
