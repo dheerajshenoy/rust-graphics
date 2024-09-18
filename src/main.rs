@@ -49,9 +49,20 @@ impl Body {
         self.mass.clone()
     }
 
+    fn draw(&self) {
+        draw_circle(self.position.x(),
+            self.position.y(),
+            self.radius,
+            self.color);
+
+        self.trail.draw();
+    }
+
     fn move_body(&mut self, dt: f32) {
         self.position.set_x(self.position.x() + self.velocity.x() * dt);
         self.position.set_y(self.position.y() + self.velocity.y() * dt);
+
+        self.trail.update(self.position);
     }
 
     fn check_boundary_collision(&mut self) {
@@ -65,7 +76,6 @@ impl Body {
             || self.position.y() - self.radius <= 0.0 {
                 self.velocity.set_y(self.velocity.y() * -1.0);
             }
-
     }
 
     fn distance(&self, other: &Body) -> f32 {
@@ -105,7 +115,7 @@ async fn main() {
 
         for i in 0..bodies.len() {
             let b = &mut bodies[i];
-            draw_circle(b.position.x(), b.position.y(), b.radius, b.color);
+            b.draw();
             b.move_body(dt);
             b.check_boundary_collision();
             for j in i + 1..bodies.len() {
